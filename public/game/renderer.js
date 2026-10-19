@@ -1,5 +1,6 @@
 import {T,W,H,COL,reduced,hsh} from './constants.js';
 import {S} from './state.js';
+import {pos} from './engine.js';
 import {hud} from '../ui/hud.js';
 let ctx=null;export function initRenderer(cv){ctx=cv.getContext('2d')}
 let bgc=null;
