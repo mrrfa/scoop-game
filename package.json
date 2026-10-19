@@ -1,0 +1,2 @@
+{"name":"scoop-game","version":"1.0.0","private":true,"type":"module","description":"SCOOP! doodle ice-cream maze game (dependency-free)","engines":{"node":">=20"},
+"scripts":{"start":"NODE_ENV=production node server.mjs","dev":"node --watch server.mjs","test":"node --test"},"license":"MIT"}

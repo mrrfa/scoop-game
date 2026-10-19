@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SCOOP!</title><link rel="stylesheet" href="styles.css"></head><body>
+
+<section id="menu" class="screen on card">
+ <h1>SCOOP!</h1><p>A little scoop of chaos.</p>
+ <button class="pk" id="bSolo">Solo Adventure</button><button class="mt" id="bCoop">Two-Player Co-op</button><br>
+ <button id="bHow">How to Play</button><button id="bLb">Leaderboard</button><button id="bAcc">Account</button><button id="bSnd">Sound: on</button><button id="bReset">Reset progress</button>
+ <p class="note">Guest progress is saved only in this browser. Best with a physical keyboard (no touch controls yet).</p>
+</section>
+
+<section id="levels" class="screen card"><h2 id="lt">Pick a level</h2><div class="grid" id="lg"></div><button id="lBack">Back</button></section>
+
+<section id="how" class="screen card">
+ <h2>How to play</h2>
+ <p><b>Pip</b> (pink): <kbd>W A S D</kbd> move · <kbd>F</kbd> make ice · <kbd>G</kbd> break ice</p>
+ <p><b>Mallow</b> (mint): <kbd>↑ ← ↓ →</kbd> move · <kbd>/</kbd> make ice · <kbd>.</kbd> break ice</p>
+ <p>Ice appears in the cell you are <b>facing</b>, and only on empty floor with no fruit, exit, player or enemy. Ice blocks enemies. Break it any time, so you can’t be trapped for good.</p>
+ <p>Collect every fruit to open the exit, then walk in. Touching an enemy costs a shared life. <kbd>P</kbd> or <kbd>Esc</kbd> pauses. In solo mode the arrow keys also move Pip.</p>
+ <button id="hBack">Back</button>
+</section>
+
+<section id="game" class="screen">
+ <div id="hud" class="card"><span id="hL"></span><span id="hF"></span><span id="hH"></span><span id="hT"></span><span><button id="bPause">Pause</button></span></div>
+ <canvas id="cv" width="720" height="528" aria-label="SCOOP game board"></canvas>
+</section>
+
+<section id="account" class="screen card"><h2>Account</h2><p class="note">Optional. Guests can always play; an account saves progress and scores on the server.</p>
+ <form id="fAuth"><input id="aEmail" type="email" placeholder="Email" autocomplete="email" required><input id="aName" placeholder="Display name (new accounts)" maxlength="20"><input id="aPass" type="password" placeholder="Password (min 8)" autocomplete="current-password" required>
+ <div><button class="mt" type="submit" id="bLogin">Log in</button><button class="pk" type="button" id="bReg">Register</button></div></form><p class="err" id="aErr" role="alert"></p><button id="aBack">Back</button></section>
+<section id="profile" class="screen card"><h2 id="pName">Profile</h2><div id="pBody">Loading…</div><button id="bLogout">Log out</button><button id="pBack">Back</button></section>
+<section id="board" class="screen card"><h2>Leaderboard</h2><p class="note">Casual ranking. Scores are validated but this is not an anti-cheat-certified competition.</p>
+ <label>Show: <select id="lbSel"><option value="all">Overall</option></select></label>
+ <div id="lbBody">Loading…</div><button id="lbPrev">Prev</button><button id="lbNext">Next</button><button id="lbBack">Back</button></section>
+<div id="ov"><div class="card" id="ovc"></div></div>
+
+<script type="module" src="app.js"></script></body></html>
