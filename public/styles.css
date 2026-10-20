@@ -20,3 +20,12 @@ kbd{background:#fff;border:2px solid var(--ink);border-radius:6px;padding:0 6px}
 form{display:grid;gap:8px;max-width:340px;margin:8px auto}input{font:inherit;padding:8px;border:3px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink)}
 input:focus-visible{outline:4px solid var(--ice)}table{width:100%;border-collapse:collapse;background:#fff;color:var(--ink)}td,th{border-bottom:2px dashed var(--brown);padding:4px 8px;text-align:left}
 .err{color:#a3243b;font-size:17px;min-height:1.2em}
+
+#bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.screen,#hud,#cv{position:relative;z-index:1}
+#turn{position:fixed;inset:0;z-index:9;pointer-events:none;display:none;transform-origin:0 50%;background:linear-gradient(90deg,rgba(56,53,47,.22),rgba(56,53,47,0) 14%),repeating-linear-gradient(0deg,transparent 0 31px,rgba(169,216,236,.45) 31px 32px),var(--bg);box-shadow:8px 0 24px rgba(56,53,47,.3)}
+#turn.on{display:block;animation:flip .55s ease-in forwards}
+@keyframes flip{from{transform:perspective(1400px) rotateY(0);opacity:1}to{transform:perspective(1400px) rotateY(-100deg);opacity:.85}}
+.screen.card.on::after{content:'✎ ✦';position:absolute;right:16px;top:8px;opacity:0;animation:doodle .7s .25s ease-out forwards;font-size:22px}
+@keyframes doodle{from{opacity:0;transform:translateY(6px) rotate(-12deg)}to{opacity:.7;transform:none}}
+@media (prefers-reduced-motion:reduce){#turn.on{display:none;animation:none}.screen.card.on::after{animation:none;opacity:.7}}
