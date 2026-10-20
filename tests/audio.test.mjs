@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+const store={};globalThis.localStorage={getItem:k=>store[k]??null,setItem:(k,v)=>{store[k]=v}};
+const A=await import('../public/game/audio.js');
+test('every audio call is a safe no-op when Web Audio is unavailable',()=>{assert.equal(typeof globalThis.AudioContext,'undefined');
+ for(const f of Object.values(A.sfx))assert.doesNotThrow(()=>f(1));assert.doesNotThrow(()=>A.snd(440));
+ assert.doesNotThrow(()=>A.unlockAudio());assert.doesNotThrow(()=>A.startMusic());assert.doesNotThrow(()=>A.stopMusic())});
+test('music and sound preferences persist locally',async()=>{A.setMusic(false);A.setSfx(false);assert.deepEqual(JSON.parse(store['scoop.audio']),{music:false,sfx:false});
+ A.setMusic(true);A.setSfx(true);assert.deepEqual(JSON.parse(store['scoop.audio']),{music:true,sfx:true});
+ const A2=await import('../public/game/audio.js?again');assert.equal(A2.audio.music,true)});
+test('sound effects are rate limited so repeated events cannot stack',()=>{assert.equal(A.gate('t',100,1000),true);assert.equal(A.gate('t',100,1050),false);assert.equal(A.gate('t',100,1120),true);assert.equal(A.gate('other',100,1050),true)});

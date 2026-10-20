@@ -11,3 +11,18 @@ for(const[i,mode]of[[0,1],[2,2],[5,2]])test(`level ${i+1} draws players, enemies
  assert.match(els.hF.textContent,/Fruit 0\//);assert.match(els.hH.textContent,/Lives/)});
 test('restart builds a fresh game (no stale ice/fruit/enemy state)',()=>{S.mode=1;const a=build(3);a.ice.add('5,5');a.fruit[0].got=true;a.lives=0;
  const b=build(3);assert.equal(b.ice.size,0);assert.ok(b.fruit.every(f=>!f.got));assert.equal(b.lives,3);assert.equal(b.time,0);assert.equal(b.state,'play')});
+
+// ---- Fruit Crown rendering ----
+import {step} from '../public/game/engine.js';
+const stand=(p,x,y)=>Object.assign(p,{x,y,fx:x,fy:y,p:1,m:false});
+function winRun(mode,pick){S.mode=mode;S.held=[[],[]];S.acts=[[],[]];S.onEnd=null;const g=S.g=build(0);for(const k of pick){stand(g.pl[0],g.fruit[k].x,g.fruit[k].y);step(1/60);step(1/60)}
+ g.fruit.forEach(f=>f.got=true);stand(g.pl[0],g.exit.x,g.exit.y);step(1/60);step(1/60);return g}
+for(const[mode,label]of[[1,'solo'],[2,'co-op']])test(`${label}: every player wears the full crown once the celebration settles`,()=>{
+ const g=winRun(mode,[0,1,2,3]);assert.equal(g.state,'win');initRenderer({getContext:()=>ctx});bake();
+ for(let i=0;i<400;i++)step(1/60);for(const k in counts)delete counts[k];assert.doesNotThrow(()=>draw());
+ assert.equal(counts.rotate,g.pl.length*4,'4 toppings per player, no stray flying fruit');
+ assert.ok(g.vic.done)});
+test('empty-fruit victory draws without toppings or errors',()=>{const g=winRun(1,[]);g.vic.layout.length=0;initRenderer({getContext:()=>ctx});bake();for(let i=0;i<200;i++)step(1/60);for(const k in counts)delete counts[k];
+ assert.doesNotThrow(()=>draw());assert.ok(!counts.rotate)});
+test('fruit fly toward the character before landing',()=>{const g=winRun(1,[0,1]);initRenderer({getContext:()=>ctx});bake();for(let i=0;i<12;i++)step(1/60);for(const k in counts)delete counts[k];draw();
+ assert.ok(g.vic.t<g.vic.fly,'still in flight');assert.ok(!counts.rotate,'nothing landed yet');assert.ok(counts.scale>=1,'flying fruit drawn')});
