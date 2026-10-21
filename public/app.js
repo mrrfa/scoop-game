@@ -1,5 +1,5 @@
 import {S} from './game/state.js';
-import {build,step,onCelebrated} from './game/engine.js';
+import {build,buildNextLevel,step,onCelebrated} from './game/engine.js';
 import {initBackdrop,drawBackdrop} from './game/backdrop.js';
 import {reduced} from './game/constants.js';
 import {initRenderer,bake,draw} from './game/renderer.js';
@@ -27,7 +27,8 @@ function loop(ts){requestAnimationFrame(loop);if(last===null)last=ts;const dt=Ma
  const g=S.g;if(g&&(g.state=='play'||(g.state=='win'&&g.vic))&&!S.stat){acc+=dt;while(acc>=1/60){step(1/60);acc-=1/60}}
  if(g&&$('#game').classList.contains('on'))draw();drawBackdrop(ts,reduced)}
 requestAnimationFrame(loop);
-function start(i){closeOv();S.stat=null;S.g=build(i);bake();setInputMode(S.mode);last=null;acc=0;show('game')}
+function launch(g){closeOv();S.stat=null;S.g=g;bake();setInputMode(S.mode);last=null;acc=0;show('game')}
+function start(i){launch(build(i))}
 function leaveGame(id){S.g=null;S.stat=null;show(id)}
 function pause(on){const g=S.g;if(!g||g.state!='play')return;
  if(on){S.stat='pause';S.held=[[],[]];ov(`<h2>Paused</h2><button class="mt" id="pR">Resume</button><button id="pX">Restart</button><button id="pL">Level select</button><button id="pH">Home</button>`);
@@ -48,7 +49,7 @@ S.onEnd=async r=>{
  if(S.g!==g)return;
  ov(`<h2>★ Level complete! ★</h2><p>${'★'.repeat(r.stars)}${'☆'.repeat(3-r.stars)}</p><p>Time ${r.time.toFixed(1)}s · Fruit ${r.total}/${r.total} · Score ${score}</p><p class="note">${note}</p>
   ${r.i<LV.length-1?'<button class="mt" id="oN">Next level</button>':'<p>You finished every level!</p>'}<button id="oR">Replay</button><button id="oL">Level select</button><button id="oH">Home</button>`);
- const n=$('#oN');if(n)n.onclick=()=>{flip();start(r.i+1)};$('#oR').onclick=()=>start(r.i);$('#oL').onclick=()=>leaveGame('levels');$('#oH').onclick=()=>leaveGame('menu')};
+ const n=$('#oN');if(n)n.onclick=()=>{flip();launch(buildNextLevel(g))};$('#oR').onclick=()=>start(r.i);$('#oL').onclick=()=>leaveGame('levels');$('#oH').onclick=()=>leaveGame('menu')};
 
 // ---- screens ----
 onShow('levels',()=>renderLevels(S.mode,prog,start));
