@@ -4,8 +4,8 @@ import {S} from './state.js';
 import {sfx} from './audio.js';
 import {makeVictory,arrival} from './crown.js';
 import {computeResult} from './score.js';
-export function build(i){const lv=LV[i],bad=validate(lv);if(bad.length)console.warn('Unreachable in level',i+1,bad);
- const s={i,lv,ice:new Set(),fruit:[],en:[],pl:[],parts:[],collected:[],boops:[],bumpCd:0,vic:null,time:0,lives:S.mode==2?5:3,state:'play',exit:null,wall:new Set(),ex:0};
+export function build(i,lives=3){const lv=LV[i],bad=validate(lv);if(bad.length)console.warn('Unreachable in level',i+1,bad);
+ const s={i,lv,ice:new Set(),fruit:[],en:[],pl:[],parts:[],collected:[],boops:[],bumpCd:0,vic:null,time:0,lives,state:'play',exit:null,wall:new Set(),ex:0};
  let fi=0;lv.r.forEach((row,y)=>[...row].forEach((c,x)=>{
   if(c=='#')s.wall.add(x+','+y);
   if(c=='P'||(c=='Q'&&S.mode==2))s.pl.push({x,y,fx:x,fy:y,p:1,m:false,face:DIRS[2],inv:0,k:c=='P'?0:1,hit:0,bump:0,bumpHeld:false});
@@ -13,6 +13,7 @@ export function build(i){const lv=LV[i],bad=validate(lv);if(bad.length)console.w
   if(c=='W'||c=='C')s.en.push({x,y,fx:x,fy:y,p:1,m:false,t:c,d:null,sp:c=='C'?3.4:2.8});
   if(c=='E')s.exit={x,y}}));
  s.total=s.fruit.length;s.par=s.total*7+20;return s}
+export function buildNextLevel(g){return build(g.i+1,g.lives)}
 const isWall=(x,y)=>x<0||y<0||x>=W||y>=H||S.g.wall.has(x+','+y);
 export const pos=e=>[e.fx+(e.x-e.fx)*e.p,e.fy+(e.y-e.fy)*e.p];
 function bfs(sx,sy,tx,ty){const prev=new Map(),k=(x,y)=>y*W+x,q=[[sx,sy]];prev.set(k(sx,sy),null);let n=0;

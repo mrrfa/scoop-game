@@ -1,11 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {S} from '../public/game/state.js';
-import {build,step} from '../public/game/engine.js';
+import {build,buildNextLevel,step} from '../public/game/engine.js';
 import {DK} from '../public/game/constants.js';
 import {computeResult,levelInfo} from '../public/game/score.js';
 const fresh=(i,mode=1)=>{S.mode=mode;S.held=[[],[]];S.acts=[[],[]];S.stat=null;S.onEnd=null;S.g=build(i);return S.g};
 const run=(n)=>{for(let k=0;k<n;k++)step(1/60)};
 test('solo has one player, co-op two',()=>{assert.equal(fresh(0,1).pl.length,1);assert.equal(fresh(0,2).pl.length,2)});
+test('new games start with three shared lives in solo and co-op',()=>{for(const mode of[1,2])assert.equal(fresh(0,mode).lives,3)});
+test('the production next-level builder carries remaining lives through all six levels',()=>{for(const mode of[1,2]){
+ let g=fresh(0,mode);const p=g.pl[0];g.en.push({x:p.x,y:p.y,fx:p.x,fy:p.y,p:1,m:false,t:'W',d:null,sp:2.8});
+ run(1);assert.equal(g.lives,2,'enemy collision deducts a shared life before level transition');
+ for(let i=1;i<6;i++){g=S.g=buildNextLevel(g);assert.equal(g.i,i,`level ${i+1}`);assert.equal(g.lives,2,`level ${i+1}`)}
+}});
 test('player moves through open cells',()=>{const g=fresh(0);S.held[0]=['r'];run(30);assert.ok(g.pl[0].x>1)});
 test('player cannot walk through solid walls',()=>{const g=fresh(0);S.held[0]=['l'];run(60);assert.equal(g.pl[0].x,1);S.held[0]=['u'];run(60);assert.equal(g.pl[0].y,1)});
 test('both co-op players move independently',()=>{const g=fresh(0,2);S.held[0]=['r'];S.held[1]=['l'];run(30);assert.ok(g.pl[0].x>1&&g.pl[1].x<13)});
@@ -20,9 +26,15 @@ test('fruit is collected exactly once and exit unlocks after the last',()=>{cons
  assert.equal(g.fruit.filter(x=>!x.got).length,g.total-1);run(5);assert.equal(g.fruit.filter(x=>!x.got).length,g.total-1);
  let end=null;S.onEnd=r=>end=r;const e=g.exit;Object.assign(g.pl[0],{x:e.x,y:e.y,fx:e.x,fy:e.y,p:1});run(2);assert.equal(g.state,'play','exit locked');
  g.fruit.forEach(x=>x.got=true);run(2);assert.equal(g.state,'win');assert.ok(end.win&&end.stars>=1)});
-test('enemy contact costs a life with invulnerability, last life ends the game',()=>{const g=fresh(2);const p=g.pl[0],e=g.en[0];
- Object.assign(e,{x:p.x,y:p.y,fx:p.x,fy:p.y,p:1,m:false});run(1);assert.equal(g.lives,2);assert.ok(p.inv>0);run(5);assert.equal(g.lives,2);
- g.lives=1;p.inv=0;let end=null;S.onEnd=r=>end=r;Object.assign(e,{x:p.x,y:p.y,fx:p.x,fy:p.y,p:1,m:false});run(1);assert.equal(g.state,'over');assert.equal(end.win,false)});
+test('enemy contact uses invulnerability and zero lives ends any level in solo and co-op',()=>{for(const mode of[1,2])for(let i=0;i<6;i++){
+ const g=fresh(i,mode),p=g.pl[0],e=g.en[0]||{x:p.x,y:p.y,fx:p.x,fy:p.y,p:1,m:false,t:'W',d:null,sp:2.8};
+ if(!g.en.length)g.en.push(e);
+ Object.assign(e,{x:p.x,y:p.y,fx:p.x,fy:p.y,p:1,m:false});g.lives=2;
+ run(1);assert.equal(g.lives,1,`life loss on level ${i+1}, mode ${mode}`);assert.ok(p.inv>0);
+ run(5);assert.equal(g.lives,1,'invulnerability prevents repeat damage');
+ p.inv=0;Object.assign(e,{x:p.x,y:p.y,fx:p.x,fy:p.y,p:1,m:false});let end=null;S.onEnd=r=>end=r;run(1);
+ assert.equal(g.state,'over',`game over on level ${i+1}, mode ${mode}`);assert.equal(end.win,false);assert.equal(end.lives,0);
+ }});
 test('chaser pathfinds and never freezes the loop, even when walled in by ice',()=>{const g=fresh(3);const c=g.en.find(e=>e.t=='C');const s0=[c.x,c.y];run(180);
  assert.ok(c.x!==s0[0]||c.y!==s0[1]);
  for(const[dx,dy]of[[0,-1],[1,0],[0,1],[-1,0]])g.ice.add(`${c.x+dx},${c.y+dy}`);run(120)});
